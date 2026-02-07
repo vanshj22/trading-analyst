@@ -19,8 +19,9 @@ class MarketStreamProcessor:
             stock = yf.Ticker(ticker)
             hist = stock.history(period="5d", interval="1h")
             
-            if hist.empty:
-                return {'error': 'No data'}
+            if hist.empty or len(hist) < 2:
+                # No data available from yfinance, use demo data
+                raise Exception("No historical data available")
             
             # Calculate volatility (std of returns)
             returns = hist['Close'].pct_change().dropna()

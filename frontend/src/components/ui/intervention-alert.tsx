@@ -49,7 +49,7 @@ export function InterventionAlert({ type, title, message }: InterventionAlertPro
     },
   };
 
-  const style = styles[type];
+  const style = styles[type as keyof typeof styles] || styles.CRITICAL;
 
   return (
     <div

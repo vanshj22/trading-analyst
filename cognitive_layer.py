@@ -6,12 +6,14 @@ import numpy as np
 from typing import Dict, List
 import google.generativeai as genai
 
+from config import PRIMARY_MODEL
+
 class MarketAnalystAgent:
     """Identifies regime shifts and market anomalies"""
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-pro')
+        self.model = genai.GenerativeModel(PRIMARY_MODEL)
     
     def analyze_regime(self, market_state: Dict) -> Dict:
         """Detects if market entered a new regime"""
@@ -41,7 +43,7 @@ class ProfilerAgent:
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel(PRIMARY_MODEL)
         self.bias_patterns = {}
     
     def profile_trader(self, trades_df) -> Dict:
@@ -97,7 +99,7 @@ class TiltDetectorAgent:
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel(PRIMARY_MODEL)
         self.panic_threshold = 0.025  # Default 2.5% volatility
     
     def detect_tilt(self, market_state: Dict, user_behavior: Dict, trader_profile: Dict) -> Dict:
@@ -137,10 +139,18 @@ Is the trader in TILT? Respond in JSON:
                 return {
                     'tilt_score': tilt_score,
                     'llm_analysis': response.text,
-                    'requires_intervention': tilt_score >= 7
+                    'requires_intervention': tilt_score >= 7,
+                    'tilt_detected': True
                 }
             except Exception as e:
-                return {'error': str(e)}
+                # Return tilt_score even if LLM fails
+                return {
+                    'tilt_score': tilt_score,
+                    'tilt_detected': True,
+                    'requires_intervention': tilt_score >= 7,
+                    'error': f"LLM analysis failed: {str(e)}",
+                    'llm_analysis': f"Tilt detected (score: {tilt_score}/10) but detailed analysis unavailable."
+                }
         
         return {
             'tilt_score': tilt_score,

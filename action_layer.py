@@ -11,7 +11,7 @@ class InterventionEngine:
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-2.0-flash')
         self.intervention_history = []
     
     def generate_intervention(self, tilt_analysis: Dict, trader_profile: Dict, market_state: Dict) -> Dict:
@@ -59,11 +59,9 @@ Keep it under 100 words. Be direct."""
     def _assess_severity(self, tilt_analysis: Dict) -> str:
         """Maps tilt score to intervention type"""
         score = tilt_analysis.get('tilt_score', 0)
-        requires_intervention = tilt_analysis.get('requires_intervention', False)
         
-        if not requires_intervention:
-            return "NONE"
-        elif score >= 9:
+        # Trigger interventions based on tilt score
+        if score >= 9:
             return "HARD_LOCK"
         elif score >= 7:
             return "CRITICAL"

@@ -274,6 +274,7 @@ class AntifragileController:
         E.g., "The market just did X, and based on your history, you tend to Y in these situations"
         """
         import google.generativeai as genai
+        from config import PRIMARY_MODEL
         
         # Safe extraction with defaults
         technicals = market_exp.get('technicals') or {}
@@ -308,7 +309,7 @@ Example format: "The market just [X], and based on your history, you tend to [Y]
 Keep it under 100 words. Be direct and helpful."""
 
         try:
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel(PRIMARY_MODEL)
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:

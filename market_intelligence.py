@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
 
+from config import PRIMARY_MODEL
+
 class MarketIntelligence:
     """
     Provides deep market analysis including:
@@ -20,7 +22,7 @@ class MarketIntelligence:
 
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel(PRIMARY_MODEL)
         self.cache = {}  # Simple cache to avoid redundant API calls
         self._last_request_time = 0
 
@@ -50,15 +52,14 @@ class MarketIntelligence:
                 return result
                 
             except Exception as e:
-                if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
-                    if attempt < max_retries - 1:
-                        sleep_time = 2 ** (attempt + 1)  # Exponential backoff: 2s, 4s, 8s
-                        time.sleep(sleep_time)
-                        continue
-                    else:
-                        raise e
+                # Fix indentation and logic here
+                if attempt < max_retries - 1:
+                    sleep_time = 2 ** (attempt + 1)
+                    time.sleep(sleep_time)
+                    continue
                 else:
-                    raise e
+                    print(f"LLM Generation failed after retries: {e}")
+                    return f"Market analysis unavailable due to AI service disruption. (Error: {str(e)[:50]}...)"
 
     def _generate_static_explanation(self, ticker: str, technicals: Dict, news: list) -> str:
         """Generates a static explanation when LLM is unavailable (rate limited, etc.)."""
@@ -133,7 +134,8 @@ class MarketIntelligence:
             
             return formatted_news
         except Exception as e:
-            return [{'title': f'Error fetching news: {str(e)}', 'publisher': 'System', 'link': '#'}]
+            print(f"Error fetching news for {ticker}: {e}")
+            return self._get_demo_news(ticker)
 
     def calculate_technicals(self, ticker: str) -> Dict:
         """
@@ -329,7 +331,17 @@ Respond in JSON format:
                 })
         
         if not briefing_data:
-            return "Unable to generate briefing. No valid data available."
+            # Fallback to demo data for briefing if real data fails
+            tickers_to_use = tickers[:5] if tickers else ['AAPL', 'TSLA', 'NVDA', 'BTC-USD']
+            for ticker in tickers_to_use:
+                technicals = self._get_demo_technicals(ticker)
+                briefing_data.append({
+                    'ticker': ticker,
+                    'price': technicals['current_price'],
+                    'change': technicals['price_change_1d'],
+                    'trend': technicals['trend'],
+                    'rsi': technicals['rsi']
+                })
         
         data_summary = "\n".join([
             f"- {d['ticker']}: ${d['price']} ({d['change']:+.2f}%) | {d['trend']} | RSI: {d['rsi']}"

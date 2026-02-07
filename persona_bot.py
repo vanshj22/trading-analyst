@@ -7,6 +7,8 @@ from typing import Dict, Optional
 from datetime import datetime
 
 
+from config import PRIMARY_MODEL
+
 # Enhanced Persona Definitions with Platform-Specific Styles
 PERSONAS = {
     "The Quantitative Stoic": {
@@ -52,7 +54,7 @@ class PersonaBot:
         if not api_key:
             raise ValueError("API Key is required")
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel(PRIMARY_MODEL)
         self.content_history = []
 
     def get_available_personas(self) -> list:
