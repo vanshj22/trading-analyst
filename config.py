@@ -8,10 +8,10 @@ Customize thresholds, models, and intervention parameters
 # ============================================================================
 
 # Primary reasoning model (options: gemini-2.0-flash-exp, gemini-1.5-pro)
-PRIMARY_MODEL = "gemini-2.5-pro"
+PRIMARY_MODEL = "gemini-1.5-flash"
 
 # Fallback model if primary fails
-FALLBACK_MODEL = "gemini-2.0-flash"
+FALLBACK_MODEL = "gemini-1.5-flash"
 
 # Temperature for LLM responses (0.0 = deterministic, 1.0 = creative)
 LLM_TEMPERATURE = 0.3

@@ -41,7 +41,7 @@ class ProfilerAgent:
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-pro')
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
         self.bias_patterns = {}
     
     def profile_trader(self, trades_df) -> Dict:
@@ -97,7 +97,7 @@ class TiltDetectorAgent:
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-pro')
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
         self.panic_threshold = 0.025  # Default 2.5% volatility
     
     def detect_tilt(self, market_state: Dict, user_behavior: Dict, trader_profile: Dict) -> Dict:

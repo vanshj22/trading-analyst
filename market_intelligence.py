@@ -20,7 +20,7 @@ class MarketIntelligence:
 
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-pro')
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
         self.cache = {}  # Simple cache to avoid redundant API calls
         self._last_request_time = 0
 

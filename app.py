@@ -87,16 +87,15 @@ with tab1:
 with tab2:
     st.header("AI Social Media Persona")
     
-    # LinkedIn Auth Management
+    # LinkedIn Auth Management - Load from .env first
     if 'linkedin_token' not in st.session_state:
-        st.session_state['linkedin_token'] = None
+        st.session_state['linkedin_token'] = os.getenv("LINKEDIN_ACCESS_TOKEN")
     if 'linkedin_urn' not in st.session_state:
-        st.session_state['linkedin_urn'] = None
+        st.session_state['linkedin_urn'] = os.getenv("LINKEDIN_USER_URN")
         
-    # Check for OAuth callback
+    # Check for OAuth callback (first-time auth)
     if 'code' in st.query_params:
         auth_code = st.query_params['code']
-        # Clear query params to prevent re-execution
         st.query_params.clear()
         
         try:
@@ -109,12 +108,22 @@ with tab2:
             if client_id and client_secret:
                 oauth = LinkedInOAuth(client_id, client_secret, LINKEDIN_REDIRECT_URI)
                 token_data = oauth.exchange_code_for_token(auth_code)
-                st.session_state['linkedin_token'] = token_data.get('access_token')
+                access_token = token_data.get('access_token')
+                st.session_state['linkedin_token'] = access_token
                 
                 # Get profile URN
-                profile = oauth.get_user_profile(st.session_state['linkedin_token'])
-                st.session_state['linkedin_urn'] = profile.get('sub') # OpenID subject ID
-                st.success("Successfully connected to LinkedIn!")
+                profile = oauth.get_user_profile(access_token)
+                user_urn = profile.get('sub')
+                st.session_state['linkedin_urn'] = user_urn
+                
+                # Save tokens to .env for future use
+                env_path = os.path.join(os.path.dirname(__file__), '.env')
+                with open(env_path, 'a') as f:
+                    f.write(f"\n# LinkedIn Access Token (auto-saved)\n")
+                    f.write(f"LINKEDIN_ACCESS_TOKEN={access_token}\n")
+                    f.write(f"LINKEDIN_USER_URN={user_urn}\n")
+                
+                st.success("✅ Connected to LinkedIn! Token saved - you won't need to login again.")
         except Exception as e:
             st.error(f"LinkedIn connection failed: {str(e)}")
 
@@ -125,9 +134,10 @@ with tab2:
         topic = st.text_input("Topic / Ticker", value="Tesla Earnings")
         context = st.text_area("Market Context (Optional)", value="Stock is up 5% despite missing revenue estimates.")
         
-        # LinkedIn Connect Button
+        # LinkedIn Connect Button - only show if no token
         if not st.session_state['linkedin_token']:
-            if st.button("Connect LinkedIn"):
+            st.warning("⚠️ First-time setup: Login once to save your LinkedIn token")
+            if st.button("Connect LinkedIn (one-time)"):
                 from linkedin_oauth import LinkedInOAuth
                 from config import LINKEDIN_REDIRECT_URI
                 
@@ -141,11 +151,7 @@ with tab2:
                 else:
                     st.error("LinkedIn credentials missing in .env")
         else:
-            st.write("✅ **Connected to LinkedIn**")
-            if st.button("Disconnect"):
-                st.session_state['linkedin_token'] = None
-                st.session_state['linkedin_urn'] = None
-                st.rerun()
+            st.success("✅ **LinkedIn Connected** (token saved)")
     
     with col_p2:
         st.markdown(f"**Current Persona:** *{selected_persona}*")

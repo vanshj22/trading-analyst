@@ -1,0 +1,250 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 256 45% 5%;
+    --foreground: 0 0% 98%;
+    --card: 256 45% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 256 45% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 262 83% 75%;
+    --primary-foreground: 256 45% 5%;
+    --secondary: 256 35% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 256 35% 15%;
+    --muted-foreground: 0 0% 64%;
+    --accent: 262 83% 75%;
+    --accent-foreground: 256 45% 5%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 256 35% 18%;
+    --input: 256 35% 18%;
+    --ring: 262 83% 75%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
+  }
+}
+
+/* Premium Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(155, 135, 245, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(139, 92, 246, 0.1), transparent),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(59, 130, 246, 0.08), transparent),
+    linear-gradient(135deg, #0a0613 0%, #150d27 50%, #0d0a1a 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Glassmorphism Card Effect */
+.glass-card {
+  @apply rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glass-card:hover {
+  @apply border-white/[0.12] bg-white/[0.04];
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(155, 135, 245, 0.1);
+}
+
+/* Premium Button Styles */
+.btn-primary {
+  @apply relative overflow-hidden rounded-xl bg-gradient-to-br from-primary to-purple-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-300;
+  box-shadow: 0 4px 16px rgba(155, 135, 245, 0.3);
+}
+
+.btn-primary:hover {
+  @apply scale-[1.02];
+  box-shadow: 0 6px 24px rgba(155, 135, 245, 0.4);
+}
+
+.btn-primary::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-300;
+}
+
+.btn-primary:hover::before {
+  @apply opacity-100;
+}
+
+/* Neumorphic Button */
+.neumorphic-button {
+  @apply relative overflow-hidden rounded-full border border-white/10 bg-gradient-to-b from-white/10 to-white/5 px-8 py-4 text-white shadow-lg transition-all duration-300;
+}
+
+.neumorphic-button::after {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300 bg-gradient-to-br from-[#9b87f5]/20 to-transparent rounded-full;
+}
+
+.neumorphic-button:hover::after {
+  @apply opacity-100;
+}
+
+.neumorphic-button:hover {
+  @apply border-primary/30;
+  box-shadow: 0 0 30px rgba(155, 135, 245, 0.3);
+}
+
+/* Metric Cards */
+.metric-card {
+  @apply glass-card p-6 transition-all duration-300;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Glow Effects */
+.glow-primary {
+  box-shadow: 0 0 40px rgba(155, 135, 245, 0.2);
+}
+
+.glow-green {
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+}
+
+.glow-red {
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+}
+
+/* Animated Gradient Border */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(155, 135, 245, 0.5), transparent, rgba(59, 130, 246, 0.5));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Status Badges */
+.badge-success {
+  @apply rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400;
+}
+
+.badge-warning {
+  @apply rounded-full bg-amber-500/20 px-3 py-1 text-xs font-medium text-amber-400;
+}
+
+.badge-error {
+  @apply rounded-full bg-red-500/20 px-3 py-1 text-xs font-medium text-red-400;
+}
+
+/* Table Styles */
+.premium-table {
+  @apply overflow-hidden rounded-2xl border border-white/[0.08];
+}
+
+.premium-table th {
+  @apply bg-white/[0.02] px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-white/50;
+}
+
+.premium-table td {
+  @apply px-6 py-4 text-sm;
+}
+
+.premium-table tbody tr {
+  @apply border-t border-white/[0.05] transition-colors;
+}
+
+.premium-table tbody tr:hover {
+  @apply bg-white/[0.03];
+}
+
+/* Pulse Animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(155, 135, 245, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(155, 135, 245, 0.6);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-white/10;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-white/20;
+}
+
+/* Selection */
+::selection {
+  @apply bg-primary/30 text-white;
+}
+
+/* Focus States */
+*:focus-visible {
+  @apply outline-none ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
+}
+
+/* Shimmer Loading Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}

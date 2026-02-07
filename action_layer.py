@@ -11,7 +11,7 @@ class InterventionEngine:
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-pro')
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
         self.intervention_history = []
     
     def generate_intervention(self, tilt_analysis: Dict, trader_profile: Dict, market_state: Dict) -> Dict:

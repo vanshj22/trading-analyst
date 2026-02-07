@@ -52,7 +52,7 @@ class PersonaBot:
         if not api_key:
             raise ValueError("API Key is required")
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-pro')
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
         self.content_history = []
 
     def get_available_personas(self) -> list:

@@ -1,4 +1,4 @@
-streamlit
+# Backend dependencies (frontend uses Next.js)
 google-generativeai
 pandas
 numpy

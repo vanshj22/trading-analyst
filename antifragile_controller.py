@@ -308,7 +308,7 @@ Example format: "The market just [X], and based on your history, you tend to [Y]
 Keep it under 100 words. Be direct and helpful."""
 
         try:
-            model = genai.GenerativeModel('gemini-2.5-pro')
+            model = genai.GenerativeModel('gemini-1.5-flash')
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:
