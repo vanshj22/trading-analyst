@@ -1,6 +1,7 @@
 streamlit
 google-generativeai
 pandas
+numpy
 yfinance
 plotly
 python-dotenv
