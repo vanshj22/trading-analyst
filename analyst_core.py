@@ -2,13 +2,36 @@ import google.generativeai as genai
 import json
 import os
 
+from config import PRIMARY_MODEL
+
+import time
+import random
+
 class PsychoAnalyst:
     def __init__(self, api_key):
         if not api_key:
             raise ValueError("API Key is required")
         genai.configure(api_key=api_key)
-        # Using gemini-2.0-flash (stable model)
-        self.model = genai.GenerativeModel('gemini-2.0-flash')
+        # Using configured primary model
+        self.model = genai.GenerativeModel(PRIMARY_MODEL)
+
+    def _generate_with_retry(self, prompt, max_retries=3, base_delay=2):
+        """Helper to handle rate limits with exponential backoff"""
+        for attempt in range(max_retries):
+            try:
+                return self.model.generate_content(prompt)
+            except Exception as e:
+                if "429" in str(e) or "Too Many Requests" in str(e):
+                    if attempt < max_retries - 1:
+                        # Exponential backoff + jitter
+                        sleep_time = (base_delay * (2 ** attempt)) + random.uniform(0, 1)
+                        print(f"⚠️ Rate limit hit. Retrying in {sleep_time:.1f}s...")
+                        time.sleep(sleep_time)
+                        continue
+                # If not a rate limit or retries exhausted, re-raise or return error
+                if attempt == max_retries - 1:
+                    raise e
+                raise e
 
     def analyze_behavior(self, trades_description):
         """
@@ -36,11 +59,11 @@ class PsychoAnalyst:
         """
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self._generate_with_retry(prompt)
             return response.text
         except Exception as e:
             if "429" in str(e):
-                return "⚠️ **API Limit Reached**: You have hit the free tier rate limit for Gemini. Please wait a minute and try again."
+                return "⚠️ **API Limit Reached**: You have hit the free tier rate limit for Gemini. We are backing off to let the API cool down."
             return f"Error connecting to Gemini: {str(e)}"
 
     def get_realtime_nudge(self, market_state, last_trade):
@@ -55,7 +78,7 @@ class PsychoAnalyst:
         Example: "Market is choppy—don't force a trade just to feel productive."
         """
         try:
-            response = self.model.generate_content(prompt)
+            response = self._generate_with_retry(prompt)
             return response.text
         except Exception as e:
             return "Stay disciplined. (System offline)"

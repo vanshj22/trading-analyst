@@ -6,14 +6,35 @@ import google.generativeai as genai
 from typing import Dict
 from datetime import datetime
 
+from config import PRIMARY_MODEL
+
+import time
+import random
+
 class InterventionEngine:
     """Generates context-aware interventions using Persona Engine"""
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.0-flash')
+        self.model = genai.GenerativeModel(PRIMARY_MODEL)
         self.intervention_history = []
     
+    def _generate_with_retry(self, prompt, max_retries=3, base_delay=2):
+        """Helper to handle rate limits with exponential backoff"""
+        for attempt in range(max_retries):
+            try:
+                return self.model.generate_content(prompt)
+            except Exception as e:
+                if "429" in str(e) or "Too Many Requests" in str(e):
+                    if attempt < max_retries - 1:
+                        sleep_time = (base_delay * (2 ** attempt)) + random.uniform(0, 1)
+                        print(f"⚠️ Intervention Engine: Rate limit hit. Retrying in {sleep_time:.1f}s...")
+                        time.sleep(sleep_time)
+                        continue
+                if attempt == max_retries - 1:
+                    raise e
+                raise e
+
     def generate_intervention(self, tilt_analysis: Dict, trader_profile: Dict, market_state: Dict) -> Dict:
         """Creates calibrated intervention message"""
         
@@ -42,7 +63,7 @@ Generate a message that:
 Keep it under 100 words. Be direct."""
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self._generate_with_retry(prompt)
             intervention = {
                 'type': severity,
                 'message': response.text,

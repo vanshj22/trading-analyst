@@ -12,6 +12,7 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 models_to_test = [
+    "gemini-2.0-flash",
     "gemini-1.5-flash",
     "gemini-1.5-flash-latest",
     "gemini-1.5-flash-001",
