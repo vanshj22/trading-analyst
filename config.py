@@ -8,10 +8,10 @@ Customize thresholds, models, and intervention parameters
 # ============================================================================
 
 # Primary reasoning model (options: gemini-2.0-flash-exp, gemini-1.5-pro)
-PRIMARY_MODEL = "gemini-2.0-flash-exp"
+PRIMARY_MODEL = "gemini-2.5-pro"
 
 # Fallback model if primary fails
-FALLBACK_MODEL = "gemini-1.5-flash"
+FALLBACK_MODEL = "gemini-2.0-flash"
 
 # Temperature for LLM responses (0.0 = deterministic, 1.0 = creative)
 LLM_TEMPERATURE = 0.3
@@ -182,6 +182,16 @@ trading patterns using chain-of-thought reasoning. Be direct and specific.""",
 supportive but firm interventions. Reference specific patterns and provide 
 actionable guidance."""
 }
+
+# ============================================================================
+# LINKEDIN CONFIGURATION
+# ============================================================================
+
+# Default redirect URI for local development
+LINKEDIN_REDIRECT_URI = "http://localhost:8501"
+
+# Scopes required for posting and user profile
+LINKEDIN_SCOPES = ["w_member_social", "openid", "profile", "email"]
 
 # ============================================================================
 # EXPORT

@@ -4,6 +4,10 @@ import data_manager
 from analyst_core import PsychoAnalyst
 from persona_bot import PersonaBot, PERSONAS
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Page Config
 st.set_page_config(
@@ -83,12 +87,65 @@ with tab1:
 with tab2:
     st.header("AI Social Media Persona")
     
+    # LinkedIn Auth Management
+    if 'linkedin_token' not in st.session_state:
+        st.session_state['linkedin_token'] = None
+    if 'linkedin_urn' not in st.session_state:
+        st.session_state['linkedin_urn'] = None
+        
+    # Check for OAuth callback
+    if 'code' in st.query_params:
+        auth_code = st.query_params['code']
+        # Clear query params to prevent re-execution
+        st.query_params.clear()
+        
+        try:
+            from linkedin_oauth import LinkedInOAuth
+            from config import LINKEDIN_REDIRECT_URI
+            
+            client_id = os.getenv("LINKEDIN_CLIENT_ID")
+            client_secret = os.getenv("LINKEDIN_CLIENT_SECRET")
+            
+            if client_id and client_secret:
+                oauth = LinkedInOAuth(client_id, client_secret, LINKEDIN_REDIRECT_URI)
+                token_data = oauth.exchange_code_for_token(auth_code)
+                st.session_state['linkedin_token'] = token_data.get('access_token')
+                
+                # Get profile URN
+                profile = oauth.get_user_profile(st.session_state['linkedin_token'])
+                st.session_state['linkedin_urn'] = profile.get('sub') # OpenID subject ID
+                st.success("Successfully connected to LinkedIn!")
+        except Exception as e:
+            st.error(f"LinkedIn connection failed: {str(e)}")
+
     col_p1, col_p2 = st.columns(2)
     
     with col_p1:
         selected_persona = st.selectbox("Choose Persona", list(PERSONAS.keys()))
         topic = st.text_input("Topic / Ticker", value="Tesla Earnings")
         context = st.text_area("Market Context (Optional)", value="Stock is up 5% despite missing revenue estimates.")
+        
+        # LinkedIn Connect Button
+        if not st.session_state['linkedin_token']:
+            if st.button("Connect LinkedIn"):
+                from linkedin_oauth import LinkedInOAuth
+                from config import LINKEDIN_REDIRECT_URI
+                
+                client_id = os.getenv("LINKEDIN_CLIENT_ID")
+                client_secret = os.getenv("LINKEDIN_CLIENT_SECRET")
+                
+                if client_id and client_secret:
+                    oauth = LinkedInOAuth(client_id, client_secret, LINKEDIN_REDIRECT_URI)
+                    auth_url, state = oauth.get_authorization_url()
+                    st.link_button("Login with LinkedIn", auth_url)
+                else:
+                    st.error("LinkedIn credentials missing in .env")
+        else:
+            st.write("✅ **Connected to LinkedIn**")
+            if st.button("Disconnect"):
+                st.session_state['linkedin_token'] = None
+                st.session_state['linkedin_urn'] = None
+                st.rerun()
     
     with col_p2:
         st.markdown(f"**Current Persona:** *{selected_persona}*")
@@ -98,10 +155,30 @@ with tab2:
             if st.button("Generate Content"):
                 with st.spinner("Crafting tweet..."):
                     bot = PersonaBot(api_key)
-                    post = bot.generate_post(selected_persona, topic, context)
-                    
-                    st.success("Generated Content:")
-                    st.code(post, language="markdown")
+                    st.session_state['generated_post'] = bot.generate_post(selected_persona, topic, context)
+            
+            if 'generated_post' in st.session_state:
+                st.success("Generated Content:")
+                st.code(st.session_state['generated_post'], language="markdown")
+                
+                # Post to LinkedIn button
+                if st.session_state['linkedin_token']:
+                    if st.button("Post to LinkedIn"):
+                        with st.spinner("Posting to LinkedIn..."):
+                            bot = PersonaBot(api_key)
+                            response = bot.post_to_linkedin(
+                                st.session_state['generated_post'],
+                                st.session_state['linkedin_token'],
+                                st.session_state['linkedin_urn']
+                            )
+                            
+                            if "error" in response:
+                                st.error(f"Failed to post: {response['error']}")
+                            else:
+                                st.success("🚀 Successfully posted to LinkedIn!")
+                                st.balloons()
+                elif st.session_state.get('generated_post'):
+                    st.caption("Connect LinkedIn to post directly")
         else:
             st.error("API Key required.")
 

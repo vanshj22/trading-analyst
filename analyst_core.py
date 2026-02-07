@@ -7,8 +7,8 @@ class PsychoAnalyst:
         if not api_key:
             raise ValueError("API Key is required")
         genai.configure(api_key=api_key)
-        # Using gemini-1.5-flash-latest to resolve 404
-        self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        # Using gemini-2.0-flash (stable model)
+        self.model = genai.GenerativeModel('gemini-2.0-flash')
 
     def analyze_behavior(self, trades_description):
         """
